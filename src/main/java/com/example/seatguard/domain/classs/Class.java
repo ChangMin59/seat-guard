@@ -36,4 +36,17 @@ public class Class {
 
     @Version
     private Long version; // 동시성 제어
+
+    //수강 신청 시 정원(현재 인원)을 증가시키는 메서드
+    public void increaseCount() {
+
+        // 현재 인원이 최대 정원 이상이면 더 이상 신청 불가
+        if (this.currentCount >= this.capacity) {
+            throw new RuntimeException("정원 초과");
+        }
+
+        // 정원 초과가 아니면 현재 인원을 1 증가
+        this.currentCount++;
+    }
 }
+
