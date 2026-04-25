@@ -82,4 +82,28 @@ public class EnrollmentService {
                 .map(EnrollmentResponseDto::new)
                 .toList();
     }
+
+    // 수강 신청 결제 완료 처리
+    @Transactional
+    public Enrollment confirm(Long enrollmentId) {
+
+        // 1. 수강 신청 조회
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new RuntimeException("신청 없음"));
+
+        // 2. 이미 확정된 경우 방지
+        if (enrollment.getStatus() == EnrollmentStatus.CONFIRMED) {
+            throw new RuntimeException("이미 확정됨");
+        }
+
+        // 3. 취소된 건 결제 불가
+        if (enrollment.getStatus() == EnrollmentStatus.CANCELLED) {
+            throw new RuntimeException("취소된 신청");
+        }
+
+        // 4. 상태 변경
+        enrollment.changeStatus(EnrollmentStatus.CONFIRMED);
+
+        return enrollment;
+    }
 }
