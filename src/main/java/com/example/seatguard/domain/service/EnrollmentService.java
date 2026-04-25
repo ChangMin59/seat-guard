@@ -21,26 +21,29 @@ public class EnrollmentService {
     private final ClassRepository classRepository;
     private final EnrollmentRepository enrollmentRepository;
 
+    // 수강 신청 처리
     @Transactional
     public Enrollment enroll(Long classId, Long userId) {
 
+        // 강의 조회
         Class clazz = classRepository.findById(classId)
                 .orElseThrow(() -> new RuntimeException("강의 없음"));
 
-        // 1. 상태 체크
+        // 강의 상태 확인 (OPEN 상태만 신청 가능)
         if (clazz.getStatus() != ClassStatus.OPEN) {
             throw new RuntimeException("신청 불가 상태");
         }
 
-        // 2. 정원 체크
-        if (clazz.getCurrentCount() >= clazz.getCapacity()) {
-            throw new RuntimeException("정원 초과");
+        try {
+            // 정원 증가 (정원 초과 + 동시성 처리)
+            clazz.increaseCount();
+
+        } catch (Exception e) {
+            // 정원 초과 또는 동시 요청 충돌
+            throw new RuntimeException("정원 초과 또는 동시 요청 충돌");
         }
 
-        // 3. 정원 증가
-        clazz.increaseCount();
-
-        // 4. 수강 신청 생성
+        // 수강 신청 생성
         Enrollment enrollment = Enrollment.builder()
                 .userId(userId)
                 .clazz(clazz)
