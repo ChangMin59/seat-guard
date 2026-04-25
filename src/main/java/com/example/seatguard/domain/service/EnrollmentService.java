@@ -58,22 +58,33 @@ public class EnrollmentService {
     @Transactional
     public Enrollment cancel(Long enrollmentId) {
 
-        // 1. 수강 신청 조회 (없으면 예외)
+        // 수강 신청 조회
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new RuntimeException("신청 없음"));
 
-        // 2. 이미 취소된 상태인지 확인 (중복 취소 방지)
+        // 이미 취소된 경우
         if (enrollment.getStatus() == EnrollmentStatus.CANCELLED) {
             throw new RuntimeException("이미 취소됨");
         }
 
-        // 3. 상태를 CANCELLED로 변경
+        // 결제 완료 후 7일 제한
+        if (enrollment.getStatus() == EnrollmentStatus.CONFIRMED) {
+            if (enrollment.getCreatedAt().plusDays(7).isBefore(LocalDateTime.now())) {
+                throw new RuntimeException("결제 후 7일이 지나 취소 불가");
+            }
+        }
+
+        // 강의 시작 이후 취소 불가
+        if (LocalDateTime.now().isAfter(enrollment.getClazz().getStartDate())) {
+            throw new RuntimeException("강의 시작 후 취소 불가");
+        }
+
+        // 상태 변경
         enrollment.changeStatus(EnrollmentStatus.CANCELLED);
 
-        // 4. 해당 강의의 현재 인원 감소
+        // 정원 감소
         enrollment.getClazz().decreaseCount();
 
-        // 5. 변경된 enrollment 반환 (JPA가 자동 반영)
         return enrollment;
     }
 
