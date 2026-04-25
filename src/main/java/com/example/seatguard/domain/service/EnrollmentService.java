@@ -48,4 +48,30 @@ public class EnrollmentService {
 
         return enrollmentRepository.save(enrollment);
     }
+
+    /**
+     수강 신청 취소 처리
+     상태를 CANCELLED로 변경하고 정원을 감소시킨다
+     */
+    @Transactional
+    public Enrollment cancel(Long enrollmentId) {
+
+        // 1. 수강 신청 조회 (없으면 예외)
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new RuntimeException("신청 없음"));
+
+        // 2. 이미 취소된 상태인지 확인 (중복 취소 방지)
+        if (enrollment.getStatus() == EnrollmentStatus.CANCELLED) {
+            throw new RuntimeException("이미 취소됨");
+        }
+
+        // 3. 상태를 CANCELLED로 변경
+        enrollment.changeStatus(EnrollmentStatus.CANCELLED);
+
+        // 4. 해당 강의의 현재 인원 감소
+        enrollment.getClazz().decreaseCount();
+
+        // 5. 변경된 enrollment 반환 (JPA가 자동 반영)
+        return enrollment;
+    }
 }

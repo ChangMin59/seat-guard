@@ -27,4 +27,11 @@ public class Enrollment {
     private EnrollmentStatus status;
 
     private LocalDateTime createdAt;
+
+    // 수강 상태 변경 (취소 등 상태 전이)
+    public void changeStatus(EnrollmentStatus status) {
+
+        // 전달받은 상태로 변경
+        this.status = status;
+    }
 }

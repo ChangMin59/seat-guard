@@ -27,4 +27,12 @@ public class EnrollmentController {
         // → 상태 체크, 정원 체크, 동시성 처리, Enrollment 생성 수행
         return enrollmentService.enroll(classId, userId);
     }
+
+    // 수강 신청 취소
+    @PatchMapping("/{id}/cancel")
+    public Enrollment cancel(@PathVariable Long id) {
+
+        // Service에 취소 로직 위임
+        return enrollmentService.cancel(id);
+    }
 }

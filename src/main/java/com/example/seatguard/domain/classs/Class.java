@@ -48,5 +48,17 @@ public class Class {
         // 정원 초과가 아니면 현재 인원을 1 증가
         this.currentCount++;
     }
+
+    // 수강 취소 시 현재 인원을 감소시키는 메서드
+    public void decreaseCount() {
+
+        // 현재 인원이 0 이하라면 더 이상 줄일 수 없음 (예외 처리)
+        if (this.currentCount <= 0) {
+            throw new RuntimeException("취소할 인원이 없음");
+        }
+
+        // 정상적인 경우 현재 인원 1 감소
+        this.currentCount--;
+    }
 }
 
