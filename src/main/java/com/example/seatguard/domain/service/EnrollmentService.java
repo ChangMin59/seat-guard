@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import com.example.seatguard.domain.dto.EnrollmentResponseDto;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -35,10 +37,10 @@ public class EnrollmentService {
             throw new RuntimeException("정원 초과");
         }
 
-        // 3. 정원 증가 (핵심)
+        // 3. 정원 증가
         clazz.increaseCount();
 
-        // 4. Enrollment 생성
+        // 4. 수강 신청 생성
         Enrollment enrollment = Enrollment.builder()
                 .userId(userId)
                 .clazz(clazz)
@@ -49,10 +51,7 @@ public class EnrollmentService {
         return enrollmentRepository.save(enrollment);
     }
 
-    /**
-     수강 신청 취소 처리
-     상태를 CANCELLED로 변경하고 정원을 감소시킨다
-     */
+    // 수강 신청 취소 처리
     @Transactional
     public Enrollment cancel(Long enrollmentId) {
 
@@ -73,5 +72,14 @@ public class EnrollmentService {
 
         // 5. 변경된 enrollment 반환 (JPA가 자동 반영)
         return enrollment;
+    }
+
+    // 내 수강 신청 목록 조회
+    public List<EnrollmentResponseDto> getMyEnrollments(Long userId) {
+
+        return enrollmentRepository.findByUserId(userId)
+                .stream()
+                .map(EnrollmentResponseDto::new)
+                .toList();
     }
 }
