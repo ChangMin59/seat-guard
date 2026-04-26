@@ -15,19 +15,17 @@ public class EnrollmentController {
     // 수강 신청 비즈니스 로직 처리 서비스
     private final EnrollmentService enrollmentService;
 
-    // 수강 신청 처리 (classId, userId 기반)
+    // 수강 신청 처리 (DTO로 메시지 포함 반환)
     @PostMapping
-    public Enrollment enroll(
-
-            // 요청 파라미터에서 classId 추출
+    public EnrollmentResponseDto enroll(
             @RequestParam Long classId,
-
-            // 요청 파라미터에서 userId 추출
             @RequestParam Long userId
     ) {
-        // Service로 비즈니스 로직 위임
-        // → 상태 체크, 정원 체크, 동시성 처리, Enrollment 생성 수행
-        return enrollmentService.enroll(classId, userId);
+        // 서비스 실행
+        Enrollment enrollment = enrollmentService.enroll(classId, userId);
+
+        // DTO로 감싸서 반환 (status + message 포함)
+        return new EnrollmentResponseDto(enrollment);
     }
 
     // 수강 신청 취소
@@ -48,5 +46,13 @@ public class EnrollmentController {
     @PatchMapping("/{id}/confirm")
     public Enrollment confirm(@PathVariable Long id) {
         return enrollmentService.confirm(id);
+    }
+
+    // 대기열 인원 수 조회 API
+    @GetMapping("/{classId}/waiting-count")
+    public long getWaitingCount(@PathVariable Long classId) {
+
+        // 👉 Service 호출
+        return enrollmentService.getWaitingCount(classId);
     }
 }
