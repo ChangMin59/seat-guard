@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import com.example.seatguard.domain.classs.ClassStatus;
+import com.example.seatguard.domain.dto.ClassDetailResponseDto;
 
 @Service
 @RequiredArgsConstructor
@@ -39,5 +40,13 @@ public class ClassService {
 
         // status 있으면 필터 조회
         return classRepository.findByStatus(status);
+    }
+
+    // 강의 상세 DTO 조회 (추가)
+    public ClassDetailResponseDto getClassDetail(Long id) {
+        Class clazz = classRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("강의 없음"));
+
+        return new ClassDetailResponseDto(clazz);
     }
 }

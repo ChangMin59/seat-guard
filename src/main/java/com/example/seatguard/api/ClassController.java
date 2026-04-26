@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import com.example.seatguard.domain.classs.ClassStatus;
+import com.example.seatguard.domain.dto.ClassDetailResponseDto;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,9 +27,9 @@ public class ClassController {
         return classService.getClasses(status);
     }
 
-    // 강의 상세 조회
+    // 강의 상세 조회 (DTO 적용)
     @GetMapping("/{id}")
-    public Class getOne(@PathVariable Long id) {
-        return classService.getOne(id);
+    public ClassDetailResponseDto getOne(@PathVariable Long id) {
+        return classService.getClassDetail(id);
     }
 }
