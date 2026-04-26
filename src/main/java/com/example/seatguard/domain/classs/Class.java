@@ -53,7 +53,7 @@ public class Class {
         }
     }
 
-    // 수강 취소 시 정원 감소 + 상태 복구
+    // 수강 취소 시 정원 감소 + 상태 복구 (시간 고려)
     public void decreaseCount() {
 
         if (this.currentCount <= 0) {
@@ -63,10 +63,38 @@ public class Class {
         // 인원 감소
         this.currentCount--;
 
-        // CLOSED 상태였다면 다시 OPEN으로 복구
+        // CLOSED였다면, 종료 전일 때만 OPEN 복구
         if (this.status == ClassStatus.CLOSED) {
-            this.status = ClassStatus.OPEN;
+            LocalDateTime now = LocalDateTime.now();
+
+            if (this.endDate == null || now.isBefore(this.endDate)) {
+                this.status = ClassStatus.OPEN;
+            }
         }
+    }
+
+    // 시간 기준 상태 업데이트 (DRAFT는 수동 유지, CLOSED 조건 우선)
+    public void updateStatusByTime(LocalDateTime now) {
+
+        // DRAFT는 강사가 직접 OPEN으로 바꾸기 전까지 유지
+        if (this.status == ClassStatus.DRAFT) {
+            return;
+        }
+
+        // 종료일이 지났으면 무조건 CLOSED
+        if (this.endDate != null && now.isAfter(this.endDate)) {
+            this.status = ClassStatus.CLOSED;
+            return;
+        }
+
+        // 정원이 꽉 차면 CLOSED
+        if (this.currentCount >= this.capacity) {
+            this.status = ClassStatus.CLOSED;
+            return;
+        }
+
+        // 그 외에는 모집 중 상태 유지 (OPEN)
+        this.status = ClassStatus.OPEN;
     }
 }
 

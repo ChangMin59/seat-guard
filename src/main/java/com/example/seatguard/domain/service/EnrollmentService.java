@@ -29,7 +29,14 @@ public class EnrollmentService {
         Class clazz = classRepository.findById(classId)
                 .orElseThrow(() -> new RuntimeException("강의 없음"));
 
-        // 강의 상태 확인 (OPEN 상태만 신청 가능)
+        // 현재 시간 기준으로 상태 최신화
+        clazz.updateStatusByTime(LocalDateTime.now());
+
+        // 정원 먼저 체크
+        if (clazz.getCurrentCount() >= clazz.getCapacity()) {
+            throw new RuntimeException("정원 초과");
+        }
+        // 상태 체크
         if (clazz.getStatus() != ClassStatus.OPEN) {
             throw new RuntimeException("신청 불가 상태");
         }
@@ -84,6 +91,9 @@ public class EnrollmentService {
 
         // 정원 감소
         enrollment.getClazz().decreaseCount();
+
+        // 정원 변경 이후 상태 재계산 (CLOSED → OPEN 복구 반영)
+        enrollment.getClazz().updateStatusByTime(LocalDateTime.now());
 
         return enrollment;
     }

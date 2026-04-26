@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import com.example.seatguard.domain.classs.ClassStatus;
 import com.example.seatguard.domain.dto.ClassDetailResponseDto;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -19,33 +20,32 @@ public class ClassService {
         return classRepository.save(clazz);
     }
 
-    // 전체 조회
-    public List<Class> getAll() {
-        return classRepository.findAll();
-    }
-
-    // 단건 조회
-    public Class getOne(Long id) {
-        return classRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("강의 없음"));
-    }
-
-    // 상태 필터 포함 강의 목록 조회
+    // 상태 필터 포함 강의 목록 조회 (시간 기준 상태 반영 후 필터링)
     public List<Class> getClasses(ClassStatus status) {
 
-        // status 없으면 전체 조회
-        if (status == null) {
-            return classRepository.findAll();
+        // 1. 전체 조회 후 상태 최신화
+        List<Class> classes = classRepository.findAll().stream()
+                .peek(c -> c.updateStatusByTime(LocalDateTime.now()))
+                .toList();
+
+        // 2. status가 있으면 메모리에서 필터링
+        if (status != null) {
+            return classes.stream()
+                    .filter(c -> c.getStatus() == status)
+                    .toList();
         }
 
-        // status 있으면 필터 조회
-        return classRepository.findByStatus(status);
+        // 3. 없으면 전체 반환
+        return classes;
     }
 
-    // 강의 상세 DTO 조회 (추가)
+    // 강의 상세 DTO 조회
     public ClassDetailResponseDto getClassDetail(Long id) {
         Class clazz = classRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("강의 없음"));
+
+        // DTO 변환 전에 상태 최신화 (시간 기준 상태 반영)
+        clazz.updateStatusByTime(LocalDateTime.now());
 
         return new ClassDetailResponseDto(clazz);
     }
