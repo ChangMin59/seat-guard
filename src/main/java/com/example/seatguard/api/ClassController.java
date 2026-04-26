@@ -4,8 +4,8 @@ import com.example.seatguard.domain.classs.Class;
 import com.example.seatguard.domain.service.ClassService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import com.example.seatguard.domain.classs.ClassStatus;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,10 +20,10 @@ public class ClassController {
         return classService.create(clazz);
     }
 
-    // 강의 목록 조회
+    // 강의 목록 조회 (상태 필터 포함)
     @GetMapping
-    public List<Class> getAll() {
-        return classService.getAll();
+    public List<Class> getClasses(@RequestParam(required = false) ClassStatus status) {
+        return classService.getClasses(status);
     }
 
     // 강의 상세 조회

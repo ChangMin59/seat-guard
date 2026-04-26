@@ -4,8 +4,8 @@ import com.example.seatguard.domain.classs.Class;
 import com.example.seatguard.domain.classs.ClassRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
+import com.example.seatguard.domain.classs.ClassStatus;
 
 @Service
 @RequiredArgsConstructor
@@ -27,5 +27,17 @@ public class ClassService {
     public Class getOne(Long id) {
         return classRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("강의 없음"));
+    }
+
+    // 상태 필터 포함 강의 목록 조회
+    public List<Class> getClasses(ClassStatus status) {
+
+        // status 없으면 전체 조회
+        if (status == null) {
+            return classRepository.findAll();
+        }
+
+        // status 있으면 필터 조회
+        return classRepository.findByStatus(status);
     }
 }
