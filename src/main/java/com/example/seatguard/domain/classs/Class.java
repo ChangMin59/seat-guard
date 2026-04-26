@@ -36,28 +36,37 @@ public class Class {
     @Version
     private Long version; // 동시성 제어
 
-    //수강 신청 시 정원(현재 인원)을 증가시키는 메서드
+    // 수강 신청 시 정원 증가 + 상태 자동 변경
     public void increaseCount() {
 
-        // 현재 인원이 최대 정원 이상이면 더 이상 신청 불가
+        // 정원 초과 방지
         if (this.currentCount >= this.capacity) {
             throw new RuntimeException("정원 초과");
         }
 
-        // 정원 초과가 아니면 현재 인원을 1 증가
+        // 인원 증가
         this.currentCount++;
+
+        // 정원이 꽉 차면 CLOSED
+        if (this.currentCount == this.capacity) {
+            this.status = ClassStatus.CLOSED;
+        }
     }
 
-    // 수강 취소 시 현재 인원을 감소시키는 메서드
+    // 수강 취소 시 정원 감소 + 상태 복구
     public void decreaseCount() {
 
-        // 현재 인원이 0 이하라면 더 이상 줄일 수 없음 (예외 처리)
         if (this.currentCount <= 0) {
             throw new RuntimeException("취소할 인원이 없음");
         }
 
-        // 정상적인 경우 현재 인원 1 감소
+        // 인원 감소
         this.currentCount--;
+
+        // CLOSED 상태였다면 다시 OPEN으로 복구
+        if (this.status == ClassStatus.CLOSED) {
+            this.status = ClassStatus.OPEN;
+        }
     }
 }
 
