@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import com.example.seatguard.domain.dto.EnrollmentResponseDto;
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +38,15 @@ public class EnrollmentService {
             throw new RuntimeException("신청 불가 상태");
         }
 
-        // 정원에 따라 분기
+        // 중복 신청 체크
+        boolean exists = enrollmentRepository
+                .existsByClazzAndUserId(clazz, userId);
+
+        if (exists) {
+            throw new RuntimeException("이미 신청한 강의입니다.");
+        }
+
+        //5. 정원에 따라 분기
         EnrollmentStatus status;
 
         if (clazz.getCurrentCount() >= clazz.getCapacity()) {
@@ -57,7 +66,11 @@ public class EnrollmentService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        return enrollmentRepository.save(enrollment);
+        try {
+            return enrollmentRepository.save(enrollment);
+        } catch (DataIntegrityViolationException e) {
+            throw new RuntimeException("이미 신청한 강의입니다.");
+        }
     }
 
     // 수강 신청 취소 처리

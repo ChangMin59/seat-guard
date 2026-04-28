@@ -17,4 +17,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     // 대기열 인원 수 조회
     long countByClazzAndStatus(Class clazz, EnrollmentStatus status);
+
+    // 중복 신청 여부 확인
+    boolean existsByClazzAndUserId(Class clazz, Long userId);
 }
