@@ -249,7 +249,6 @@ AI가 생성한 코드를 무작정 사용하는 것이 아니라,
 
 POST http://localhost:8080/classes
 
-```json
 {
   "title": "테스트 강의",
   "description": "설명",
